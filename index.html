@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Comercial — Registro de Campo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        header { 
+            background: linear-gradient(135deg, #003366 0%, #004080 100%); 
+            color: white; 
+            padding: 30px 20px; 
+            text-align: center; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #d4af37;
+            background: white;
+            padding: 5px;
+        }
+        
+        .header-text {
+            text-align: left;
+        }
+        
+        header h1 { 
+            font-size: 2em; 
+            margin-bottom: 5px;
+            color: #d4af37;
+        }
+        
+        header p { 
+            font-size: 1.1em; 
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .lawyer-info {
+            background: rgba(212, 175, 55, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: inline-block;
+        }
+        
+        .lawyer-info strong {
+            color: #d4af37;
+            font-size: 1.1em;
+        }
+        
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .whatsapp-btn:hover {
+            transform: scale(1.05);
+            background: #20bd5a;
+        }
+        
+        .whatsapp-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+        
+        .section { background: white; margin: 20px 0; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .section h2 { color: #003366; margin-bottom: 20px; font-size: 1.5em; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
+        input[type="text"], input[type="number"], input[type="tel"], select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1em; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #003366; }
+        button { background: #003366; color: white; padding: 12px 30px; border: none; border-radius: 6px; font-size: 1em; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #004080; }
+        button.secondary { background: #d4af37; color: #003366; }
+        button.secondary:hover { background: #c4a030; }
+        .gps-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .coordinates-display { background: #e6f7ff; padding: 15px; border-radius: 6px; margin: 15px 0; font-family: monospace; }
+        #map { width: 100%; height: 400px; border-radius: 8px; margin: 20px 0; }
+        .property-card { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #003366; }
+        .property-card h3 { color: #003366; margin-bottom: 10px; }
+        .stats { font-size: 1.1em; color: #666; margin-bottom: 20px; }
+        .hidden { display: none; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        
+        footer {
+            background: #003366;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        
+        footer .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        footer .footer-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #d4af37;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; }
+            .header-text { text-align: center; }
+            header h1 { font-size: 1.5em; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="logo.jpg" alt="Logo JHG" class="logo">
+            </div>
+            <div class="header-text">
+                <h1>Guía Comercial — Registro de Campo</h1>
+                <p>Registro de campo · GPS + UTM</p>
+                <div class="lawyer-info">
+                    <strong>Abg. Jesús Hidalgo García</strong>
+                    <br>
+                    <a href="https://wa.me/584247054515" class="whatsapp-btn" target="_blank">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        WhatsApp: +58 424-7054515
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="section">
+            <h2>📊 Guía Comercial</h2>
+            <div class="stats" id="stats">0 establecimientos registrados</div>
+        </div>
+
+        <div class="section">
+            <h2>1️ Capturar ubicación</h2>
+            
+            <div class="gps-section">
+                <h3>📍 Usar GPS de este dispositivo</h3>
+                <p>Párate frente al establecimiento y presiona el botón — el navegador toma la ubicación de tu celular o laptop automáticamente.</p>
+                <button class="secondary" onclick="getCurrentLocation()" style="margin-top: 15px;">📍 Capturar GPS actual</button>
+                <div class="coordinates-display" id="gpsCoordinates">Latitud: — | Longitud: —</div>
+            </div>
+
+            <div class="gps-section">
+                <h3>🌐 Coordenadas UTM</h3>
+                <p>¿Tienes coordenadas UTM de un GPS de mano (Garmin, etc.)?</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 15px 0;">
+                    <div class="form-group">
+                        <label>Este (X)</label>
+                        <input type="number" id="utmX" placeholder="Ej: 345678">
+                    </div>
+                    <div class="form-group">
+                        <label>Norte (Y)</label>
+                        <input type="number" id="utmY" placeholder="Ej: 1234567">
+                    </div>
+                    <div class="form-group">
+                        <label>Zona</label>
+                        <input type="number" id="utmZone" placeholder="Ej: 19" value="19">
+                    </div>
+                    <div class="form-group">
+                        <label>Hemisferio</label>
+                        <select id="utmHemisphere">
+                            <option value="N">Norte</option>
+                            <option value="S">Sur</option>
+                        </select>
+                    </div>
+                </div>
+                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">Zona 19N cubre la mayor parte del estado Zulia (incluye Santa Bárbara de Zulia).</p>
+                <button onclick="convertUTM()" style="margin-top: 15px;">Convertir a coordenadas</button>
+                <div class="coordinates-display" id="utmResult" style="margin-top: 15px;">Latitud: — | Longitud: —</div>
+            </div>
+
+            <div id="map"></div>
+        </div>
+
+        <div class="section">
+            <h2>2️ Datos del establecimiento</h2>
+            <form id="establishmentForm">
+                <div class="form-group">
+                    <label for="name">Nombre del comercio *</label>
+                    <input type="text" id="name" required placeholder="Ej: Bodega Doña María">
+                </div>
+                <div class="form-group">
+                    <label for="type">Tipo de establecimiento *</label>
+                    <select id="type" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Abarrotes / Bodega">Abarrotes / Bodega</option>
+                        <option value="Restaurante / Comida">Restaurante / Comida</option>
+                        <option value="Ropa y Calzado">Ropa y Calzado</option>
+                        <option value="Ferretería">Ferretería</option>
+                        <option value="Farmacia">Farmacia</option>
+                        <option value="Salud / Consultorio">Salud / Consultorio</option>
+                        <option value="Repuestos / Taller">Repuestos / Taller</option>
+                        <option value="Servicios (banco, oficina)">Servicios (banco, oficina)</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="address">Dirección</label>
+                    <input type="text" id="address" placeholder="Dirección completa">
+                </div>
+                <div class="form-group">
+                    <label for="hours">Horario de trabajo</label>
+                    <input type="text" id="hours" placeholder="Ej: Lun-Vie 8am-6pm">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Teléfono (opcional)</label>
+                    <input type="tel" id="phone" placeholder="+58 424 7054515">
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notas (opcional)</label>
+                    <textarea id="notes" rows="3" placeholder="Información adicional..."></textarea>
+                </div>
+                <button type="submit" class="secondary">💾 Guardar establecimiento en el mapa</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>3️⃣ Establecimientos registrados</h2>
+            <div id="establishmentsList">
+                <div class="loading">Cargando registros…</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <img src="logo.jpg" alt="Logo JHG" class="footer-logo">
+            <div>
+                <strong>Abg. Jesús Hidalgo García</strong>
+                <br>
+                <small>Desarrollado por JHG Legal Tech</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let establishments = [];
+        let currentLat = null;
+        let currentLng = null;
+        let map = null;
+        let markers = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            loadEstablishments();
+        });
+
+        function initMap() {
+            map = L.map('map').setView([9.0, -71.5], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+        }
+
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        currentLat = position.coords.latitude;
+                        currentLng = position.coords.longitude;
+                        updateGPSDisplay();
+                        updateMapMarker(currentLat, currentLng);
+                    },
+                    function(error) {
+                        alert('Error al obtener ubicación: ' + error.message);
+                    }
+                );
+            } else {
+                alert('Geolocalización no soportada por este navegador');
+            }
+        }
+
+        function updateGPSDisplay() {
+            document.getElementById('gpsCoordinates').textContent = 
+                `Latitud: ${currentLat.toFixed(6)} | Longitud: ${currentLng.toFixed(6)}`;
+        }
+
+        function convertUTM() {
+            const x = parseFloat(document.getElementById('utmX').value);
+            const y = parseFloat(document.getElementById('utmY').value);
+            const zone = parseInt(document.getElementById('utmZone').value);
+            const hemisphere = document.getElementById('utmHemisphere').value;
+
+            if (isNaN(x) || isNaN(y) || isNaN(zone)) {
+                alert('Por favor ingresa valores UTM válidos');
+                return;
+            }
+
+            const lat = (y / 111320) + (hemisphere === 'S' ? -1 : 1) * 0;
+            const lng = (x / 111320) - 180 + (zone * 6);
+
+            currentLat = lat;
+            currentLng = lng;
+
+            document.getElementById('utmResult').textContent = 
+                `Latitud: ${lat.toFixed(6)} | Longitud: ${lng.toFixed(6)}`;
+            
+            updateMapMarker(lat, lng);
+        }
+
+        function updateMapMarker(lat, lng) {
+            if (map) {
+                map.setView([lat, lng], 15);
+            }
+        }
+
+        document.getElementById('establishmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const establishment = {
+                id: Date.now(),
+                name: document.getElementById('name').value,
+                type: document.getElementById('type').value,
+                address: document.getElementById('address').value,
+                hours: document.getElementById('hours').value,
+                phone: document.getElementById('phone').value,
+                notes: document.getElementById('notes').value,
+                latitude: currentLat,
+                longitude: currentLng,
+                createdAt: new Date().toISOString()
+            };
+
+            establishments.push(establishment);
+            saveEstablishments();
+            displayEstablishments();
+            addMarkerToMap(establishment);
+            
+            alert('✅ Establecimiento guardado exitosamente');
+            this.reset();
+        });
+
+        function addMarkerToMap(establishment) {
+            if (map && establishment.latitude && establishment.longitude) {
+                const marker = L.marker([establishment.latitude, establishment.longitude])
+                    .addTo(map)
+                    .bindPopup(`<b>${establishment.name}</b><br>${establishment.type}`);
+                markers.push(marker);
+            }
+        }
+
+        function saveEstablishments() {
+            localStorage.setItem('establishments', JSON.stringify(establishments));
+            document.getElementById('stats').textContent = `${establishments.length} establecimientos registrados`;
+        }
+
+        function loadEstablishments() {
+            const saved = localStorage.getItem('establishments');
+            if (saved) {
+                establishments = JSON.parse(saved);
+                displayEstablishments();
+                establishments.forEach(est => addMarkerToMap(est));
+            }
+        }
+
+        function displayEstablishments() {
+            const list = document.getElementById('establishmentsList');
+            
+            if (establishments.length === 0) {
+                list.innerHTML = '<div class="loading">No hay establecimientos registrados</div>';
+                return;
+            }
+
+            list.innerHTML = establishments.map(e => `
+                <div class="property-card">
+                    <h3>${e.name}</h3>
+                    <p><strong>Tipo:</strong> ${e.type}</p>
+                    ${e.address ? `<p><strong>Dirección:</strong> ${e.address}</p>` : ''}
+                    ${e.hours ? `<p><strong>Horario:</strong> ${e.hours}</p>` : ''}
+                    ${e.phone ? `<p><strong>Teléfono:</strong> ${e.phone}</p>` : ''}
+                    ${e.notes ? `<p><strong>Notas:</strong> ${e.notes}</p>` : ''}
+                    ${e.latitude ? `<p><strong>Ubicación:</strong> ${e.latitude.toFixed(6)}, ${e.longitude.toFixed(6)}</p>` : ''}
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
